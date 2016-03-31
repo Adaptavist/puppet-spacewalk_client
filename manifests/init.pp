@@ -1,12 +1,12 @@
 class spacewalk_client  (
-    $spacewalk_server_address              = $spacewalk_client::params::spacewalk_server_address,
+    $spacewalk_server_address,
+    $spacewalk_activation_key,
+    $spacewalk_certificate_url,
     $spacewalk_server_uri                  = $spacewalk_client::params::spacewalk_server_uri,
     $spacewalk_server_protocol             = $spacewalk_client::params::spacewalk_server_protocol,
-    $spacewalk_certificate_url             = $spacewalk_client::params::spacewalk_certificate_url,
     $spacewalk_repository                  = $spacewalk_client::params::spacewalk_repository,
     $spacewalk_repository_package          = $spacewalk_client::params::spacewalk_repository_package,
     $spacewalk_packages                    = $spacewalk_client::params::spacewalk_packages,
-    $spacewalk_activation_key              = $spacewalk_client::params::spacewalk_activation_key,
     $local_certificate_folder              = $spacewalk_client::params::local_certificate_folder,
     $local_certificate_file                = $spacewalk_client::params::local_certificate_file,
     $package_manager_disable_diff_file     = $spacewalk_client::params::package_manager_disable_diff_file,
@@ -31,7 +31,7 @@ class spacewalk_client  (
         $repo_require = [Package[$spacewalk_repository_package]]
     } elsif ($::operatingsystem == 'Ubuntu') {
         exec { 'spacewalk_repository':
-            command => 'add-apt-repository ${spacewalk_repository} -y'
+            command => "add-apt-repository ${spacewalk_repository} -y"
         }
 
         file { $subsystem_directory:

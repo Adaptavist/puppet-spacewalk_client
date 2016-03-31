@@ -1,10 +1,7 @@
 class spacewalk_client::params {
     # OS independant params
-    $spacewalk_server_address = 'spacewalk.example.com'
     $spacewalk_server_uri = 'XMLRPC'
     $spacewalk_server_protocol = 'https'
-    $spacewalk_certificate_url = 'https://spacewalk.example.com/pub/RHN-ORG-TRUSTED-SSL-CERT'
-    $spacewalk_activation_key = '1-1234567890'
     $local_certificate_file = 'RHN-ORG-TRUSTED-SSL-CERT'
     $local_certificate_folder = '/usr/share/rhn'
     $subsystem_directory = '/var/lock/subsys'
@@ -40,7 +37,7 @@ class spacewalk_client::params {
             } elsif ($::operatingsystemmajrelease == '6') {
                 $major_os_version = '6'
             } else {
-                fail("spacewalk_client - Unsupported RHEL/CentOS Version: ${::operatingsystemrelease}")
+                fail("spacewalk_client - Unsupported RHEL/CentOS Version: ${::operatingsystemmajrelease}")
             }
             $spacewalk_repository = "http://yum.spacewalkproject.org/2.3-client/RHEL/${major_os_version}/x86_64/spacewalk-client-repo-2.3-2.el${major_os_version}.noarch.rpm"
             $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'm2crypto', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
