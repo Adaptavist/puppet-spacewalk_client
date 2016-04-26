@@ -23,6 +23,7 @@ describe 'spacewalk_client', :type => 'class' do
   centos_spacewalk_package6 = 'yum-rhn-plugin'
   centos_spacewalk_package7 = 'rhncfg-management'
   centos_spacewalk_package8 = 'rhncfg-actions'
+  spacewalk_poll_interval = '120'
   
   context "Should fail for unsupported CentOS version" do
     let(:facts) { {
@@ -72,6 +73,23 @@ describe 'spacewalk_client', :type => 'class' do
     end
   end
 
+
+  context "Should fail for Unparsable operatingsystemmajrelease:" do
+    let(:facts) { {
+      :operatingsystem => "Ubuntu",
+      :operatingsystemmajrelease => nil
+      } }
+    let(:params) { {
+      :spacewalk_server_address => spacewalk_server_address,
+      :spacewalk_activation_key => spacewalk_activation_key,
+      :spacewalk_certificate_url => spacewalk_certificate_url,
+      } }
+    
+    it do
+      should compile.and_raise_error(/Unparsable \$::operatingsystemmajrelease:/)
+    end
+  end
+
   context "Should register spacewalk client on Redhat" do
     let(:facts) { {
       :operatingsystem => "RedHat",
@@ -86,7 +104,8 @@ describe 'spacewalk_client', :type => 'class' do
       :spacewalk_server_address => spacewalk_server_address,
       :spacewalk_server_uri => spacewalk_server_uri,
       :local_certificate_file => local_certificate_file,
-      :spacewalk_activation_key => spacewalk_activation_key
+      :spacewalk_activation_key => spacewalk_activation_key,
+      :spacewalk_poll_interval => spacewalk_poll_interval
       } }
     
     it do
@@ -147,7 +166,7 @@ describe 'spacewalk_client', :type => 'class' do
   context "Should register spacewalk client on Ubuntu 12" do
     let(:facts) { {
       :operatingsystem => "Ubuntu",
-      :operatingsystemmajrelease => '12'
+      :operatingsystemmajrelease => '12.04'
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
@@ -158,7 +177,8 @@ describe 'spacewalk_client', :type => 'class' do
       :spacewalk_server_address => spacewalk_server_address,
       :spacewalk_server_uri => spacewalk_server_uri,
       :local_certificate_file => local_certificate_file,
-      :spacewalk_activation_key => spacewalk_activation_key
+      :spacewalk_activation_key => spacewalk_activation_key,
+      :spacewalk_poll_interval => spacewalk_poll_interval
       } }
     
     it do
@@ -198,12 +218,12 @@ describe 'spacewalk_client', :type => 'class' do
       )
       should contain_file('/etc/apt/sources.list.d/spacewalk.list').with(
             'ensure'  => 'present',
-            'content' => "deb spacewalk://#{spacewalk_server_address}/#{spacewalk_server_uri} channels: #{spacewalk_repo_channels_12}",
+            'content' => "deb spacewalk://#{spacewalk_server_address} channels: #{spacewalk_repo_channels_12}\n",
       )
 
       should contain_file('/etc/apt/apt.conf.d/00spacewalk').with(
             'ensure'  => 'present',
-            'content' => 'Acquire::Pdiffs "false";',
+            'content' => "Acquire::Pdiffs \"false\";\n",
       )
     end
   end
@@ -211,7 +231,7 @@ describe 'spacewalk_client', :type => 'class' do
   context "Should register spacewalk client on Ubuntu" do
     let(:facts) { {
       :operatingsystem => "Ubuntu",
-      :operatingsystemmajrelease => '14'
+      :operatingsystemmajrelease => '14.04'
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
@@ -262,12 +282,12 @@ describe 'spacewalk_client', :type => 'class' do
       )
       should contain_file('/etc/apt/sources.list.d/spacewalk.list').with(
             'ensure'  => 'present',
-            'content' => "deb spacewalk://#{spacewalk_server_address}/#{spacewalk_server_uri} channels: #{spacewalk_repo_channels_14}",
+            'content' => "deb spacewalk://#{spacewalk_server_address} channels: #{spacewalk_repo_channels_14}\n",
       )
 
       should contain_file('/etc/apt/apt.conf.d/00spacewalk').with(
             'ensure'  => 'present',
-            'content' => 'Acquire::Pdiffs "false";',
+            'content' => "Acquire::Pdiffs \"false\";\n",
       )
     end
   end

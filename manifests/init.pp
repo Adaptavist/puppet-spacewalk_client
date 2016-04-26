@@ -10,13 +10,14 @@ class spacewalk_client  (
     $local_certificate_folder              = $spacewalk_client::params::local_certificate_folder,
     $local_certificate_file                = $spacewalk_client::params::local_certificate_file,
     $package_manager_disable_diff_file     = $spacewalk_client::params::package_manager_disable_diff_file,
-    $package_manager_disable_diff_command  = $spacewalk_client::params::package_manager_disable_diff_command,
+    $package_manager_disable_diff_content  = $spacewalk_client::params::package_manager_disable_diff_content,
     $package_manager_repo_file             = $spacewalk_client::params::package_manager_repo_file,
     $spacewalk_repo_channels               = $spacewalk_client::params::spacewalk_repo_channels,
     $subsystem_directory                   = $spacewalk_client::params::subsystem_directory,
     $force_registration                    = $spacewalk_client::params::force_registration,
     $spacewalk_poll_interval               = $spacewalk_client::params::spacewalk_poll_interval,
     $spacewalk_poll_config                 = $spacewalk_client::params::spacewalk_poll_config,
+    $rhnsd_service                         = $spacewalk_client::params::rhnsd_service,
     ) inherits spacewalk_client::params {
 
     #validate stuff
@@ -63,18 +64,29 @@ class spacewalk_client  (
     if ($::operatingsystem == 'Ubuntu') {
         file { $package_manager_repo_file:
             ensure  => 'present',
-            content => "deb spacewalk://${spacewalk_server_address}/${spacewalk_server_uri} channels: ${spacewalk_repo_channels}",
+            content => "deb spacewalk://${spacewalk_server_address} channels: ${spacewalk_repo_channels}\n",
             require => Exec['register_spacewalk_client']
         }
 
+        # create config file that disables apt-get update diffs
         file { $package_manager_disable_diff_file:
             ensure  => 'present',
-            content => $package_manager_disable_diff_command,
+            content => "${package_manager_disable_diff_content}\n",
             require => Exec['register_spacewalk_client']
         }
     }
+  
+    # TODO - turn this into an exec so it can have a check that the file exists
+    augeas { 'update_polling_interval':
+        context =>  "/files/${spacewalk_poll_config}/",
+        changes =>  "set INTERVAL ${spacewalk_poll_interval}",
+        notify  => exec['restart_rhnsd']
+    }
 
-    # TODO - set polling interval
+    exec { 'restart_rhnsd':
+        command     => "service ${rhnsd_service} restart",
+        refreshonly => 'true'
+    }
 
     # TODO - rhn-actions-control to delegate addition permissions
 }

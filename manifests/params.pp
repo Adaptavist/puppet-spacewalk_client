@@ -7,7 +7,8 @@ class spacewalk_client::params {
     $subsystem_directory = '/var/lock/subsys'
     $force_registration = 'false'
     $spacewalk_poll_interval = '60'
-    $spacewalk_poll_config = ' /etc/sysconfig/rhn/rhnsd'
+    $spacewalk_poll_config = '/etc/sysconfig/rhn/rhnsd'
+    $rhnsd_service = 'rhnsd'
 
     # OS specific params
     case $::operatingsystem {
@@ -27,7 +28,7 @@ class spacewalk_client::params {
             $spacewalk_repository = 'ppa:aaronr/spacewalk'
             $spacewalk_packages = ['software-properties-common', 'apt-transport-spacewalk', 'rhnsd', 'python-libxml2']
             $package_manager_disable_diff_file = '/etc/apt/apt.conf.d/00spacewalk'
-            $package_manager_disable_diff_command = 'Acquire::Pdiffs "false";'
+            $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
             $spacewalk_repository_package = undef
         }
@@ -42,7 +43,7 @@ class spacewalk_client::params {
             $spacewalk_repository = "http://yum.spacewalkproject.org/2.3-client/RHEL/${major_os_version}/x86_64/spacewalk-client-repo-2.3-2.el${major_os_version}.noarch.rpm"
             $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'm2crypto', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
             $package_manager_disable_diff_file = undef
-            $package_manager_disable_diff_command = undef
+            $package_manager_disable_diff_content = undef
             $package_manager_repo_file = undef
             $spacewalk_repo_channels = undef
             $spacewalk_repository_package = "spacewalk-client-repo-2.3-2.el${major_os_version}.noarch"
