@@ -80,7 +80,8 @@ class spacewalk_client  (
     augeas { 'update_polling_interval':
         context =>  "/files/${spacewalk_poll_config}/",
         changes =>  "set INTERVAL ${spacewalk_poll_interval}",
-        notify  => exec['restart_rhnsd']
+        notify  => exec['restart_rhnsd'],
+        require => Package[$spacewalk_packages]
     }
 
     exec { 'restart_rhnsd':
