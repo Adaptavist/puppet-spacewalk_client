@@ -18,6 +18,14 @@ class spacewalk_client  (
     $spacewalk_poll_interval               = $spacewalk_client::params::spacewalk_poll_interval,
     $spacewalk_poll_config                 = $spacewalk_client::params::spacewalk_poll_config,
     $rhnsd_service                         = $spacewalk_client::params::rhnsd_service,
+    $allow_deploy_action                   = $spacewalk_client::params::allow_deploy_action,
+    $allow_diff_action                     = $spacewalk_client::params::allow_diff_action,
+    $allow_upload_action                   = $spacewalk_client::params::allow_upload_action,
+    $allow_mtime_upload_action             = $spacewalk_client::params::allow_mtime_upload_action,
+    $allow_run_action                      = $spacewalk_client::params::allow_run_action,
+    $osad_packages                         = $spacewalk_client::params::osad_packages,
+    $install_osad                          = $spacewalk_client::params::install_osad,
+    $osad_service                          = $spacewalk_client::params::osad_service
     ) inherits spacewalk_client::params {
 
     #validate stuff
@@ -46,8 +54,10 @@ class spacewalk_client  (
 
     if str2bool($force_registration) {
         $real_force_registration = '--force'
+        $register_unless = 'test 1 = 2'
     } else {
         $real_force_registration = ''
+        $register_unless = 'test -f /etc/sysconfig/rhn/systemid'
     }
 
     package { $spacewalk_packages:
@@ -58,7 +68,8 @@ class spacewalk_client  (
         command => "wget ${spacewalk_certificate_url} -P ${local_certificate_folder}"
     } ->
     exec { 'register_spacewalk_client':
-        command => "rhnreg_ks ${real_force_registration} --serverUrl=${spacewalk_server_protocol}://${spacewalk_server_address}/${spacewalk_server_uri} --sslCACert=${local_certificate_folder}/${local_certificate_file} --activationkey=${spacewalk_activation_key}"
+        command => "rhnreg_ks ${real_force_registration} --serverUrl=${spacewalk_server_protocol}://${spacewalk_server_address}/${spacewalk_server_uri} --sslCACert=${local_certificate_folder}/${local_certificate_file} --activationkey=${spacewalk_activation_key}",
+        unless  => $register_unless
     }
 
     if ($::operatingsystem == 'Ubuntu') {
@@ -88,5 +99,52 @@ class spacewalk_client  (
         refreshonly => 'true'
     }
 
-    # TODO - rhn-actions-control to delegate addition permissions
+    # TODO - MAKE OSAD AND RHN-ACTIONS-CONTROL WORK WITH UBUNTU
+    if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
+        # work out actions
+        
+        $deploy_action  = str2bool($allow_deploy_action) ? {
+            false => '--disable-deploy',
+            default => '--enable-deploy',
+        }
+
+        $diff_action  = str2bool($allow_diff_action) ? {
+            false => '--disable-diff',
+            default => '--enable-diff',
+        }
+
+        $upload_action  = str2bool($allow_upload_action) ? {
+            false => '--disable-upload',
+            default => '--enable-upload',
+        }
+
+        $mtime_upload_action = str2bool($allow_mtime_upload_action) ? {
+            false => '--disable-mtime-upload',
+            default => '--enable-mtime-upload',
+        }
+
+        $run_action = str2bool($allow_run_action) ? {
+            false => '--disable-run',
+            default => '--enable-run',
+        }
+
+
+        exec { 'update_spacewalk_action_control':
+            command => "rhn-actions-control ${deploy_action} ${diff_action} ${upload_action} ${mtime_upload_action} ${run_action} -f",
+            require => Exec['register_spacewalk_client']
+        }
+
+        if str2bool($install_osad) {
+            # if osad is needed install it
+            package { $osad_packages:
+                ensure  => 'installed',
+                require => $repo_require
+            } ->
+            # and make sure the service is 
+            service {$osad_service:
+                ensure => running,
+                enable => true,
+            }
+        }
+    }
 }

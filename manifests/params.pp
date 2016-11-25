@@ -9,6 +9,13 @@ class spacewalk_client::params {
     $spacewalk_poll_interval = '60'
     $spacewalk_poll_config = '/etc/sysconfig/rhn/rhnsd'
     $rhnsd_service = 'rhnsd'
+    $allow_deploy_action = false
+    $allow_diff_action  = false
+    $allow_upload_action = false
+    $allow_mtime_upload_action = false
+    $allow_run_action = false
+    $install_osad = false
+    $osad_service = 'osad'
 
     # OS specific params
     case $::operatingsystem {
@@ -31,6 +38,7 @@ class spacewalk_client::params {
             $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
             $spacewalk_repository_package = undef
+            $osad_packages = []
         }
         'RedHat', 'CentOS': {
             if ($::operatingsystemmajrelease == '7') {
@@ -47,6 +55,7 @@ class spacewalk_client::params {
             $package_manager_repo_file = undef
             $spacewalk_repo_channels = undef
             $spacewalk_repository_package = "spacewalk-client-repo-2.3-2.el${major_os_version}.noarch"
+            $osad_packages = ['osad']
         }
         default: {
             fail("spacewalk_client - Unsupported Operating System: ${::operatingsystem}")
