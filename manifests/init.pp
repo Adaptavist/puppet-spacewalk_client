@@ -65,7 +65,8 @@ class spacewalk_client  (
         require => $repo_require
     } ->
     exec { 'get_spacewalk_certificate':
-        command => "wget ${spacewalk_certificate_url} -P ${local_certificate_folder}"
+        command => "wget ${spacewalk_certificate_url} -P ${local_certificate_folder}",
+        creates => "${local_certificate_folder}/${local_certificate_file}"
     } ->
     exec { 'register_spacewalk_client':
         command => "rhnreg_ks ${real_force_registration} --serverUrl=${spacewalk_server_protocol}://${spacewalk_server_address}/${spacewalk_server_uri} --sslCACert=${local_certificate_folder}/${local_certificate_file} --activationkey=${spacewalk_activation_key}",
@@ -91,7 +92,8 @@ class spacewalk_client  (
     augeas { 'update_polling_interval':
         context =>  "/files/${spacewalk_poll_config}/",
         changes =>  "set INTERVAL ${spacewalk_poll_interval}",
-        notify  => exec['restart_rhnsd']
+        notify  => exec['restart_rhnsd'],
+        require => Package[$spacewalk_packages]
     }
 
     exec { 'restart_rhnsd':
