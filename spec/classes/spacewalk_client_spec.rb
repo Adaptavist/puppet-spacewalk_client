@@ -7,7 +7,11 @@ describe 'spacewalk_client', :type => 'class' do
   operatingsystemmajrelease_centos = '7'
   fail_operatingsystemrelease = '5'
   fail_operatintsystem = 'Windows'
-  repo_require_centos = "Package[#{spacewalk_repository_package}]"
+  if Puppet.version.to_f >= 4.0
+      repo_require_centos = "[Package[#{spacewalk_repository_package}]{:name=>\"#{spacewalk_repository_package}\"}]"
+  else
+      repo_require_centos = "Package[#{spacewalk_repository_package}]"
+  end
   spacewalk_certificate_url = 'spacewalk_certificate_url'
   local_certificate_folder = '/usr/share/rhn'
   default_force_registration = ''
@@ -89,7 +93,7 @@ describe 'spacewalk_client', :type => 'class' do
   context "Should fail for Unparsable operatingsystemmajrelease:" do
     let(:facts) { {
       :operatingsystem => "Ubuntu",
-      :operatingsystemmajrelease => nil
+      :operatingsystemmajrelease => ''
       } }
     let(:params) { {
       :spacewalk_server_address => spacewalk_server_address,

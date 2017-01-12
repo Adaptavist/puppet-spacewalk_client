@@ -87,12 +87,12 @@ class spacewalk_client  (
             require => Exec['register_spacewalk_client']
         }
     }
-  
+
     # TODO - turn this into an exec so it can have a check that the file exists
     augeas { 'update_polling_interval':
         context =>  "/files/${spacewalk_poll_config}/",
         changes =>  "set INTERVAL ${spacewalk_poll_interval}",
-        notify  => exec['restart_rhnsd'],
+        notify  => Exec['restart_rhnsd'],
         require => Package[$spacewalk_packages]
     }
 
@@ -104,7 +104,7 @@ class spacewalk_client  (
     # TODO - MAKE OSAD AND RHN-ACTIONS-CONTROL WORK WITH UBUNTU
     if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
         # work out actions
-        
+
         $deploy_action  = str2bool($allow_deploy_action) ? {
             false => '--disable-deploy',
             default => '--enable-deploy',
