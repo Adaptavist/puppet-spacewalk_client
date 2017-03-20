@@ -16,6 +16,7 @@ class spacewalk_client::params {
     $allow_run_action = false
     $install_osad = false
     $osad_service = 'osad'
+    $yum_gpg_keys = {}
 
     # OS specific params
     case $::operatingsystem {

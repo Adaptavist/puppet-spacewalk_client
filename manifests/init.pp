@@ -25,7 +25,8 @@ class spacewalk_client  (
     $allow_run_action                      = $spacewalk_client::params::allow_run_action,
     $osad_packages                         = $spacewalk_client::params::osad_packages,
     $install_osad                          = $spacewalk_client::params::install_osad,
-    $osad_service                          = $spacewalk_client::params::osad_service
+    $osad_service                          = $spacewalk_client::params::osad_service,
+    $yum_gpg_keys                          = $spacewalk_client::params::yum_gpg_keys,
     ) inherits spacewalk_client::params {
 
     #validate stuff
@@ -86,6 +87,11 @@ class spacewalk_client  (
             content => "${package_manager_disable_diff_content}\n",
             require => Exec['register_spacewalk_client']
         }
+    }
+    elsif ($::osfamily == 'RedHat' and $yum_gpg_keys and $yum_gpg_keys != 'false' and $yum_gpg_keys != false) {
+        validate_hash($yum_gpg_keys)
+        Spacewalk_client::Gpg_key<| |> -> Package<| |>
+        create_resources('spacewalk_client::gpg_key',$yum_gpg_keys)
     }
 
     # TODO - turn this into an exec so it can have a check that the file exists

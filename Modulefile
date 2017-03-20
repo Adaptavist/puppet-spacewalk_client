@@ -1,5 +1,5 @@
 name 'adaptavist-spacewalk_client'
-version '1.0.0'
+version '1.0.1'
 source 'https://github.com/Adaptavist/puppet-spacewalk-client.git'
 author 'adaptavist'
 summary 'Spacewalk Client Module'
