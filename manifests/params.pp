@@ -39,7 +39,7 @@ class spacewalk_client::params {
             $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
             $spacewalk_repository_package = undef
-            $osad_packages = []$yum_gpg_keys = []
+            $osad_packages = []
         }
         'RedHat', 'CentOS': {
             if ($::operatingsystemmajrelease == '7') {
