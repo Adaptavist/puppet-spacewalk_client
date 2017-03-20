@@ -16,6 +16,7 @@ class spacewalk_client::params {
     $allow_run_action = false
     $install_osad = false
     $osad_service = 'osad'
+    $yum_gpg_keys = {}
 
     # OS specific params
     case $::operatingsystem {
@@ -38,7 +39,7 @@ class spacewalk_client::params {
             $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
             $spacewalk_repository_package = undef
-            $osad_packages = []
+            $osad_packages = []$yum_gpg_keys = []
         }
         'RedHat', 'CentOS': {
             if ($::operatingsystemmajrelease == '7') {
