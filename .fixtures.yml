@@ -2,5 +2,7 @@ fixtures:
   repositories:
     stdlib:
       repo: "https://github.com/Adaptavist/puppet-stdlib"
+    apt:
+      repo: "https://github.com/Adaptavist/puppet-apt"
   symlinks:
     spacewalk_client: "#{source_dir}"

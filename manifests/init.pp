@@ -27,11 +27,15 @@ class spacewalk_client  (
     $install_osad                          = $spacewalk_client::params::install_osad,
     $osad_service                          = $spacewalk_client::params::osad_service,
     $yum_gpg_keys                          = $spacewalk_client::params::yum_gpg_keys,
+    $osad_repository                       = $spacewalk_client::params::osad_repository,
+    $osad_repository_release               = $spacewalk_client::params::osad_repository_release,
+    $osad_repository_config_file           = $spacewalk_client::params::osad_repository_config_file,
+    $spool_directory                       = $spacewalk_client::params::spool_directory,
     ) inherits spacewalk_client::params {
 
     #validate stuff
     validate_re($spacewalk_server_protocol, ['^https$', '^http$'])
-
+    
     if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
         package { $spacewalk_repository_package:
             ensure   => 'installed',
@@ -40,15 +44,35 @@ class spacewalk_client  (
         }
         $repo_require = [Package[$spacewalk_repository_package]]
     } elsif ($::operatingsystem == 'Ubuntu') {
-        exec { 'spacewalk_repository':
-            command => "add-apt-repository ${spacewalk_repository} -y"
+        include apt
+
+        # instal spacewalk ppa repo
+        apt::ppa { $spacewalk_repository: }
+
+        # install osad ppa repo
+        apt::ppa { $osad_repository: }
+
+        # as there are no trusty packages for osad but the precice ones work, hack the configured repo
+        $osr_array = split($::operatingsystemmajrelease,'[\/\.]')
+        $major_os_version = $osr_array[0]
+        if ($major_os_version == '14') {
+            exec { 'modify_osad_repository':
+                command => "sed -i 's#/ubuntu.*main#/ubuntu ${osad_repository_release} main#g' ${osad_repository_config_file}",
+                require => Apt::Ppa[$osad_repository],
+                before  => File[$subsystem_directory],
+            }
         }
 
+        # ensure subsystem directory exists
         file { $subsystem_directory:
             ensure => 'directory'
         }
 
-        $repo_require = [Exec['spacewalk_repository'], File[$subsystem_directory]]
+        # ensure spool directory exists
+        file { $spool_directory:
+            ensure => 'directory'
+        }
+        $repo_require = [Apt::Ppa[$spacewalk_repository], Apt::Ppa[$osad_repository], File[$subsystem_directory], File[$spool_directory]]
     } else {
         fail("spacewalk_client - Unsupported Operating System: ${::operatingsystem}")
     }
@@ -107,52 +131,48 @@ class spacewalk_client  (
         refreshonly => 'true'
     }
 
-    # TODO - MAKE OSAD AND RHN-ACTIONS-CONTROL WORK WITH UBUNTU
-    if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
-        # work out actions
+    # work out actions
 
-        $deploy_action  = str2bool($allow_deploy_action) ? {
-            false => '--disable-deploy',
-            default => '--enable-deploy',
-        }
+    $deploy_action  = str2bool($allow_deploy_action) ? {
+        false => '--disable-deploy',
+        default => '--enable-deploy',
+    }
 
-        $diff_action  = str2bool($allow_diff_action) ? {
-            false => '--disable-diff',
-            default => '--enable-diff',
-        }
+    $diff_action  = str2bool($allow_diff_action) ? {
+        false => '--disable-diff',
+        default => '--enable-diff',
+    }
 
-        $upload_action  = str2bool($allow_upload_action) ? {
-            false => '--disable-upload',
-            default => '--enable-upload',
-        }
+    $upload_action  = str2bool($allow_upload_action) ? {
+        false => '--disable-upload',
+        default => '--enable-upload',
+    }
 
-        $mtime_upload_action = str2bool($allow_mtime_upload_action) ? {
-            false => '--disable-mtime-upload',
-            default => '--enable-mtime-upload',
-        }
+    $mtime_upload_action = str2bool($allow_mtime_upload_action) ? {
+        false => '--disable-mtime-upload',
+        default => '--enable-mtime-upload',
+    }
 
-        $run_action = str2bool($allow_run_action) ? {
-            false => '--disable-run',
-            default => '--enable-run',
-        }
+    $run_action = str2bool($allow_run_action) ? {
+        false => '--disable-run',
+        default => '--enable-run',
+    }
 
+    exec { 'update_spacewalk_action_control':
+        command => "rhn-actions-control ${deploy_action} ${diff_action} ${upload_action} ${mtime_upload_action} ${run_action} -f",
+        require => Exec['register_spacewalk_client']
+    }
 
-        exec { 'update_spacewalk_action_control':
-            command => "rhn-actions-control ${deploy_action} ${diff_action} ${upload_action} ${mtime_upload_action} ${run_action} -f",
-            require => Exec['register_spacewalk_client']
-        }
-
-        if str2bool($install_osad) {
-            # if osad is needed install it
-            package { $osad_packages:
-                ensure  => 'installed',
-                require => $repo_require
-            } ->
-            # and make sure the service is 
-            service {$osad_service:
-                ensure => running,
-                enable => true,
-            }
+    if str2bool($install_osad) {
+        # if osad is needed install it
+        package { $osad_packages:
+            ensure  => 'installed',
+            require => $repo_require
+        } ->
+        # and make sure the service is 
+        service {$osad_service:
+            ensure => running,
+            enable => true,
         }
     }
 }

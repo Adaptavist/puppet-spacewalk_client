@@ -4,7 +4,7 @@
 
 The **spacewalk_client** module registers a system with a spacewalk server, it also installs all the nessisary components to achieve this
 
-Currently Ubuntu 12/14 and RHEL/Centos 6/7 are supported, however OSAD support is limited to RHEL/CentOS 6/7.
+Currently Ubuntu 12/14 and RHEL/Centos 6/7 are supported.
 
 ## Configuration
 
@@ -30,7 +30,7 @@ Specified the protocol to use to access spacewalk, used with the `spacewalk_serv
 
 `spacewalk_client::spacewalk_repository`
 
-Specified the package repository from which Spacekwalk pacgaes can be installed, defaults to **pa:aaronr/spacewalk** on Ubuntu and **http://yum.spacewalkproject.org/2.3-client/RHEL/<MAJOR_OS_VERSION>/x86_64/spacewalk-client-repo-2.3-2.el<MAJOR_OS_VERSION>.noarch.rpm** on RHEL/CentOS systems
+Specified the package repository from which Spacekwalk packages can be installed, defaults to **pa:aaronr/spacewalk** on Ubuntu and **http://yum.spacewalkproject.org/2.3-client/RHEL/<MAJOR_OS_VERSION>/x86_64/spacewalk-client-repo-2.3-2.el<MAJOR_OS_VERSION>.noarch.rpm** on RHEL/CentOS systems
 
 `spacewalk_client::spacewalk_repository_package`
 
@@ -54,11 +54,11 @@ Specifies the location of a file that configures an apt-get repo pointing to the
 
 `spacewalk_client::package_manager_disable_diff_file`
 
-Specified the location of a file to disable pdiffs on the apt repositories provided by the Spacewalk server , only used for Ubuntu systems, defaults to **/etc/apt/apt.conf.d/00spacewalk**
+Specified the location of a file to disable pdiffs on the apt repositories provided by the Spacewalk server, only used for Ubuntu systems, defaults to **/etc/apt/apt.conf.d/00spacewalk**
 
 `spacewalk_client::package_manager_disable_diff_content`
 
-Specified the content of the file to disable pdiffs on the apt repositories provided by the Spacewalk server , only used for Ubuntu systems, defaults to **Acquire::Pdiffs "false";**
+Specified the content of the file to disable pdiffs on the apt repositories provided by the Spacewalk server, only used for Ubuntu systems, defaults to **Acquire::Pdiffs "false";**
 
 `spacewalk_client::spacewalk_repo_channels`
 
@@ -106,15 +106,35 @@ Specifies if spacewalk should have run action rights on the client, currently th
 
 `spacewalk_client::osad_packages`
 
-Specifies a list of packages that need to be installed to support OSAD, currently this is only avaliable for RHEL/CentOS systems and defaults to **osad**
+Specifies a list of packages that need to be installed to support OSAD, defaults to **['osad','pyjabber']** on Ubuntu and **['osad']** on RHEL/CentOS systems
 
 `spacewalk_client::install_osad`
 
-Specified if OSAD should be installed, currently this is only avaliable for RHEL/CentOS systems and defaults to **false**
+Specified if OSAD should be installed, defaults to **false**
 
 `spacewalk_client::osad_service`
 
-Specified the name of the OSAD service, currently this is only avaliable for RHEL/CentOS systems and defaults to **osad**
+Specified the name of the OSAD service, defaults to **osad**
+
+`spacewalk_client::yum_gpg_keys`
+
+A hash of YUM Repository GPG keys to be installed, only used for RHEL/CentOS systems and defaults to **empty hash**
+
+`spacewalk_client::osad_repository`
+
+Specified the package repository from which OSAD packages can be installed, only used for Ubuntu systems, defaults to  **ppa:mj-casalogic/spacewalk-ubuntu** 
+
+`spacewalk_client::osad_repository_release`
+
+Specifies the release version to use for the OSAD package repository, only used for Ubuntu systems, defaults to **precise**, there is no trusty (Ubuntu 14) version avaliable, however precise (Ubuntu 12) packages work with 14
+
+`spacewalk_client::osad_repository_config_file`
+
+Secified the apt config file for the OSAD repo, only used for Ubuntu systems and defaults to */etc/apt/sources.list.d/mj-casalogic-spacewalk-ubuntu-precise.list* on Ubuntu 12 and */etc/apt/sources.list.d/mj-casalogic-spacewalk-ubuntu-trusty.list* on Ubuntu 14
+
+`spacewalk_client::spool_directory`
+
+Specifies the spool directory, defaults to **/var/spool/rhn**
 
 ## Example Usage:
  

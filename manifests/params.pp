@@ -17,29 +17,35 @@ class spacewalk_client::params {
     $install_osad = false
     $osad_service = 'osad'
     $yum_gpg_keys = {}
+    $spool_directory = '/var/spool/rhn'
 
     # OS specific params
     case $::operatingsystem {
         'Ubuntu': {
             $osr_array = split($::operatingsystemmajrelease,'[\/\.]')
-            $distrelease = $osr_array[0]
-            if ! $distrelease {
+            $major_os_version = $osr_array[0]
+            if ! $major_os_version {
                 fail("spacewalk_client - Unparsable \$::operatingsystemmajrelease: ${::operatingsystemmajrelease}")
             }
-            if ($distrelease == '12') {
+            if ($major_os_version == '12') {
                 $spacewalk_repo_channels = 'precise precise-updates precise-security'
-            } elsif ($distrelease == '14') {
+                $osad_repository_config_file = '/etc/apt/sources.list.d/mj-casalogic-spacewalk-ubuntu-precise.list'
+            } elsif ($major_os_version == '14') {
                 $spacewalk_repo_channels = 'trusty trusty-updates trusty-security'
+                $osad_repository_config_file = '/etc/apt/sources.list.d/mj-casalogic-spacewalk-ubuntu-trusty.list'
             } else {
-                fail("spacewalk_client - Unsupported Ubuntu Version: ${distrelease}")
+                fail("spacewalk_client - Unsupported Ubuntu Version: ${major_os_version}")
             }
             $spacewalk_repository = 'ppa:aaronr/spacewalk'
-            $spacewalk_packages = ['software-properties-common', 'apt-transport-spacewalk', 'rhnsd', 'python-libxml2']
+            $spacewalk_packages = ['software-properties-common', 'apt-transport-spacewalk', 'rhnsd', 'python-libxml2','rhncfg']
             $package_manager_disable_diff_file = '/etc/apt/apt.conf.d/00spacewalk'
             $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
             $spacewalk_repository_package = undef
-            $osad_packages = []
+            $osad_packages = ['osad','pyjabber']
+            $osad_repository = 'ppa:mj-casalogic/spacewalk-ubuntu'
+            $osad_repository_release = 'precise'
+
         }
         'RedHat', 'CentOS': {
             if ($::operatingsystemmajrelease == '7') {
@@ -57,6 +63,10 @@ class spacewalk_client::params {
             $spacewalk_repo_channels = undef
             $spacewalk_repository_package = "spacewalk-client-repo-2.3-2.el${major_os_version}.noarch"
             $osad_packages = ['osad']
+            $osad_repository = undef
+            $osad_repository_distribution = undef
+            $osad_repository_config_file = undef
+
         }
         default: {
             fail("spacewalk_client - Unsupported Operating System: ${::operatingsystem}")
