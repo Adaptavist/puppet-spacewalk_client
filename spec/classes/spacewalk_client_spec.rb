@@ -183,7 +183,8 @@ describe 'spacewalk_client', :type => 'class' do
       :lsbdistid => 'Ubuntu',
       :operatingsystemmajrelease => '12.04',
       :lsbdistrelease => '12.04',
-      :lsbdistcodename => 'precise'
+      :lsbdistcodename => 'precise',
+      :puppetversion => Puppet.version
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
@@ -255,6 +256,7 @@ describe 'spacewalk_client', :type => 'class' do
       :operatingsystemmajrelease => '14.04',
       :lsbdistrelease => '14.04',
       :lsbdistcodename => 'trusty',
+      :puppetversion => Puppet.version
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
