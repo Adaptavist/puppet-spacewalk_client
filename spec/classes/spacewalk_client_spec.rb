@@ -34,12 +34,17 @@ describe 'spacewalk_client', :type => 'class' do
   ubuntu_spacewalk_package3 = 'rhnsd'
   ubuntu_spacewalk_package4 = 'python-libxml2'
   subsystem_directory = '/var/lock/subsys'
-  repo_require_ubuntu = '[Exec[spacewalk_repository]{:command=>"spacewalk_repository"}, File[/var/lock/subsys]{:path=>"/var/lock/subsys"}]'
+  osad_repository = 'osad_repository'
+  spool_directory = '/var/spool/rhn'
+  repo_require_ubuntu = "[Apt::Ppa[#{spacewalk_repository}]{:name=>\"#{spacewalk_repository}\"}, Apt::Ppa[#{osad_repository}]{:name=>\"#{osad_repository}\"}, File[#{subsystem_directory}]{:path=>\"#{subsystem_directory}\"}, File[#{spool_directory}]{:path=>\"#{spool_directory}\"}]"
   spacewalk_repo_channels_12 = 'precise precise-updates precise-security'
   spacewalk_repo_channels_14 = 'trusty trusty-updates trusty-security'
   spacewalk_poll_interval = '120'
   osad_service = 'osad_fake'
   action_require = 'Exec[register_spacewalk_client]'
+  osad_repository_release = 'bob'
+  osad_repository_config_file = '/tmp/config.me'
+
   
   context "Should fail for unsupported CentOS version" do
     let(:facts) { {
@@ -174,7 +179,12 @@ describe 'spacewalk_client', :type => 'class' do
   context "Should register spacewalk client on Ubuntu 12" do
     let(:facts) { {
       :operatingsystem => "Ubuntu",
-      :operatingsystemmajrelease => '12.04'
+      :osfamily => "Debian",
+      :lsbdistid => 'Ubuntu',
+      :operatingsystemmajrelease => '12.04',
+      :lsbdistrelease => '12.04',
+      :lsbdistcodename => 'precise',
+      :puppetversion => Puppet.version
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
@@ -186,7 +196,8 @@ describe 'spacewalk_client', :type => 'class' do
       :spacewalk_server_uri => spacewalk_server_uri,
       :local_certificate_file => local_certificate_file,
       :spacewalk_activation_key => spacewalk_activation_key,
-      :spacewalk_poll_interval => spacewalk_poll_interval
+      :spacewalk_poll_interval => spacewalk_poll_interval,
+      :osad_repository => osad_repository
       } }
     
     it do
@@ -195,11 +206,12 @@ describe 'spacewalk_client', :type => 'class' do
           'source'   => spacewalk_repository,
           'provider' => 'rpm',
       )
-      should contain_exec('spacewalk_repository').with(
-          'command' => "add-apt-repository #{spacewalk_repository} -y"
-      )
-
+      should contain_apt__ppa(spacewalk_repository)
+      should contain_apt__ppa(osad_repository)
       should contain_file(subsystem_directory).with(
+          'ensure' => 'directory'
+      )
+      should contain_file(spool_directory).with(
           'ensure' => 'directory'
       )
       should contain_package(ubuntu_spacewalk_package1).with(
@@ -239,7 +251,12 @@ describe 'spacewalk_client', :type => 'class' do
   context "Should register spacewalk client on Ubuntu 14" do
     let(:facts) { {
       :operatingsystem => "Ubuntu",
-      :operatingsystemmajrelease => '14.04'
+      :osfamily => "Debian",
+      :lsbdistid => 'Ubuntu',
+      :operatingsystemmajrelease => '14.04',
+      :lsbdistrelease => '14.04',
+      :lsbdistcodename => 'trusty',
+      :puppetversion => Puppet.version
       } }
     let(:params) { {
       :spacewalk_repository_package => spacewalk_repository_package,
@@ -250,7 +267,10 @@ describe 'spacewalk_client', :type => 'class' do
       :spacewalk_server_address => spacewalk_server_address,
       :spacewalk_server_uri => spacewalk_server_uri,
       :local_certificate_file => local_certificate_file,
-      :spacewalk_activation_key => spacewalk_activation_key
+      :spacewalk_activation_key => spacewalk_activation_key,
+      :osad_repository => osad_repository,
+      :osad_repository_release => osad_repository_release,
+      :osad_repository_config_file => osad_repository_config_file
       } }
     
     it do
@@ -259,10 +279,19 @@ describe 'spacewalk_client', :type => 'class' do
           'source'   => spacewalk_repository,
           'provider' => 'rpm',
       )
-      should contain_exec('spacewalk_repository').with(
-          'command' => "add-apt-repository #{spacewalk_repository} -y"
+      should contain_apt__ppa(spacewalk_repository)
+      should contain_apt__ppa(osad_repository)
+      should contain_exec('modify_osad_repository').with(
+        'command' => "sed -i 's#/ubuntu.*main#/ubuntu #{osad_repository_release} main#g' #{osad_repository_config_file}",
+        'require' => "Apt::Ppa[#{osad_repository}]",
+        'before'  => "File[#{subsystem_directory}]"
       )
-
+      should contain_file(subsystem_directory).with(
+          'ensure' => 'directory'
+      )
+      should contain_file(spool_directory).with(
+          'ensure' => 'directory'
+      )
       should contain_file(subsystem_directory).with(
           'ensure' => 'directory'
       )
