@@ -182,6 +182,7 @@ describe 'spacewalk_client', :type => 'class' do
       :osfamily => "Debian",
       :lsbdistid => 'Ubuntu',
       :operatingsystemmajrelease => '12.04',
+      :lsbdistrelease => '12.04',
       :lsbdistcodename => 'precise'
       } }
     let(:params) { {
@@ -252,6 +253,7 @@ describe 'spacewalk_client', :type => 'class' do
       :osfamily => "Debian",
       :lsbdistid => 'Ubuntu',
       :operatingsystemmajrelease => '14.04',
+      :lsbdistrelease => '14.04',
       :lsbdistcodename => 'trusty',
       } }
     let(:params) { {

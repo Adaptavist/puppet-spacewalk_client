@@ -35,7 +35,7 @@ class spacewalk_client  (
 
     #validate stuff
     validate_re($spacewalk_server_protocol, ['^https$', '^http$'])
-    
+
     if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
         package { $spacewalk_repository_package:
             ensure   => 'installed',
@@ -88,12 +88,10 @@ class spacewalk_client  (
     package { $spacewalk_packages:
         ensure  => 'installed',
         require => $repo_require
-    } ->
-    exec { 'get_spacewalk_certificate':
+    } -> exec { 'get_spacewalk_certificate':
         command => "wget ${spacewalk_certificate_url} -P ${local_certificate_folder}",
         creates => "${local_certificate_folder}/${local_certificate_file}"
-    } ->
-    exec { 'register_spacewalk_client':
+    } -> exec { 'register_spacewalk_client':
         command => "rhnreg_ks ${real_force_registration} --serverUrl=${spacewalk_server_protocol}://${spacewalk_server_address}/${spacewalk_server_uri} --sslCACert=${local_certificate_folder}/${local_certificate_file} --activationkey=${spacewalk_activation_key}",
         unless  => $register_unless
     }
@@ -164,13 +162,11 @@ class spacewalk_client  (
     }
 
     if str2bool($install_osad) {
-        # if osad is needed install it
+        # if osad is needed install it and ensure the service is running
         package { $osad_packages:
             ensure  => 'installed',
             require => $repo_require
-        } ->
-        # and make sure the service is 
-        service {$osad_service:
+        } -> service {$osad_service:
             ensure => running,
             enable => true,
         }
