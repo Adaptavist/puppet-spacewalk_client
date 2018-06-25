@@ -18,6 +18,8 @@ class spacewalk_client::params {
     $osad_service = 'osad'
     $yum_gpg_keys = {}
     $spool_directory = '/var/spool/rhn'
+    $osad_logrotate_file = '/etc/logrotate.d/osad'
+    $osad_logrotate_perms = '0644'
 
     # OS specific params
     case $::operatingsystem {
