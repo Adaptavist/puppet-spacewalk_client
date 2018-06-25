@@ -44,6 +44,8 @@ describe 'spacewalk_client', :type => 'class' do
   action_require = 'Exec[register_spacewalk_client]'
   osad_repository_release = 'bob'
   osad_repository_config_file = '/tmp/config.me'
+  osad_logrotate_file = '/tmp/osad'
+  osad_logrotate_perms = '0600'
 
   
   context "Should fail for unsupported CentOS version" do
@@ -352,7 +354,9 @@ describe 'spacewalk_client', :type => 'class' do
       :allow_diff_action => false,
       :allow_upload_action  => false,
       :allow_mtime_upload_action => false,
-      :allow_run_action  => false
+      :allow_run_action  => false,
+      :osad_logrotate_file => osad_logrotate_file,
+      :osad_logrotate_perms => osad_logrotate_perms
       } }
     
     it do
@@ -368,6 +372,7 @@ describe 'spacewalk_client', :type => 'class' do
         'command' => "rhn-actions-control --disable-deploy --disable-diff --disable-upload --disable-mtime-upload --disable-run -f",
         'require' => action_require
       )
+      should contain_file(osad_logrotate_file).with('mode' => osad_logrotate_perms)
     end
   end
 
@@ -394,7 +399,9 @@ describe 'spacewalk_client', :type => 'class' do
       :allow_diff_action => true,
       :allow_upload_action  => true,
       :allow_mtime_upload_action => true,
-      :allow_run_action  => true
+      :allow_run_action  => true,
+      :osad_logrotate_file => osad_logrotate_file,
+      :osad_logrotate_perms => osad_logrotate_perms
       } }
     
     it do
@@ -410,6 +417,7 @@ describe 'spacewalk_client', :type => 'class' do
         'command' => "rhn-actions-control --enable-deploy --enable-diff --enable-upload --enable-mtime-upload --enable-run -f",
         'require' => action_require
       )
+      should contain_file(osad_logrotate_file).with('mode' => osad_logrotate_perms)
     end
   end
 

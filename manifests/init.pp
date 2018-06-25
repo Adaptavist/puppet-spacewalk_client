@@ -31,6 +31,8 @@ class spacewalk_client  (
     $osad_repository_release               = $spacewalk_client::params::osad_repository_release,
     $osad_repository_config_file           = $spacewalk_client::params::osad_repository_config_file,
     $spool_directory                       = $spacewalk_client::params::spool_directory,
+    $osad_logrotate_file                   = $spacewalk_client::params::osad_logrotate_file,
+    $osad_logrotate_perms                  = $spacewalk_client::params::osad_logrotate_perms,
     ) inherits spacewalk_client::params {
 
     #validate stuff
@@ -169,6 +171,8 @@ class spacewalk_client  (
         } -> service {$osad_service:
             ensure => running,
             enable => true,
+        } -> file { $osad_logrotate_file:
+            mode => $osad_logrotate_perms
         }
     }
 }
