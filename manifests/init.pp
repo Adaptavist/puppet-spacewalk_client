@@ -5,7 +5,8 @@ class spacewalk_client  (
     $spacewalk_server_uri                  = $spacewalk_client::params::spacewalk_server_uri,
     $spacewalk_server_protocol             = $spacewalk_client::params::spacewalk_server_protocol,
     $spacewalk_repository                  = $spacewalk_client::params::spacewalk_repository,
-    $spacewalk_repository_package          = $spacewalk_client::params::spacewalk_repository_package,
+    $spacewalk_repository_name             = $spacewalk_client::params::spacewalk_repository_name,
+    $spacewalk_repository_gpg              = $spacewalk_client::params::spacewalk_repository_gpg,
     $spacewalk_packages                    = $spacewalk_client::params::spacewalk_packages,
     $local_certificate_folder              = $spacewalk_client::params::local_certificate_folder,
     $local_certificate_file                = $spacewalk_client::params::local_certificate_file,
@@ -39,12 +40,13 @@ class spacewalk_client  (
     validate_re($spacewalk_server_protocol, ['^https$', '^http$'])
 
     if ($::operatingsystem == 'RedHat' or $::operatingsystem == 'CentOS') {
-        package { $spacewalk_repository_package:
-            ensure   => 'installed',
-            source   => $spacewalk_repository,
-            provider => 'rpm',
+        yumrepo { $spacewalk_repository_name :
+            baseurl  => $spacewalk_repository,
+            gpgkey   => $spacewalk_repository_gpg,
+            enabled  => 1,
+            gpgcheck => 1,
         }
-        $repo_require = [Package[$spacewalk_repository_package]]
+        $repo_require = [Yumrepo[$spacewalk_repository_name]]
     } elsif ($::operatingsystem == 'Ubuntu') {
         include apt
 

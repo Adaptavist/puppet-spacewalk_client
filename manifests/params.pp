@@ -43,11 +43,11 @@ class spacewalk_client::params {
             $package_manager_disable_diff_file = '/etc/apt/apt.conf.d/00spacewalk'
             $package_manager_disable_diff_content = 'Acquire::Pdiffs "false";'
             $package_manager_repo_file = '/etc/apt/sources.list.d/spacewalk.list'
-            $spacewalk_repository_package = undef
             $osad_packages = ['osad','pyjabber']
             $osad_repository = 'ppa:mj-casalogic/spacewalk-ubuntu'
             $osad_repository_release = 'precise'
-
+            $spacewalk_repository_name = undef
+            $spacewalk_repository_gpg = undef
         }
         'RedHat', 'CentOS': {
             if ($::operatingsystemmajrelease == '7') {
@@ -57,13 +57,14 @@ class spacewalk_client::params {
             } else {
                 fail("spacewalk_client - Unsupported RHEL/CentOS Version: ${::operatingsystemmajrelease}")
             }
-            $spacewalk_repository = "http://yum.spacewalkproject.org/2.3-client/RHEL/${major_os_version}/x86_64/spacewalk-client-repo-2.3-2.el${major_os_version}.noarch.rpm"
+            $spacewalk_repository = "http://copr-be.cloud.fedoraproject.org/archive/spacewalk/2.3-client/RHEL/${major_os_version}/\$basearch/"
+            $spacewalk_repository_gpg = 'http://copr-be.cloud.fedoraproject.org/archive/spacewalk/RPM-GPG-KEY-spacewalk-2014'
+            $spacewalk_repository_name = 'spacewalk-client'
             $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'm2crypto', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
             $package_manager_disable_diff_file = undef
             $package_manager_disable_diff_content = undef
             $package_manager_repo_file = undef
             $spacewalk_repo_channels = undef
-            $spacewalk_repository_package = "spacewalk-client-repo-2.3-2.el${major_os_version}.noarch"
             $osad_packages = ['osad']
             $osad_repository = undef
             $osad_repository_distribution = undef
