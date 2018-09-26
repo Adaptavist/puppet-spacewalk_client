@@ -4,13 +4,15 @@ describe 'spacewalk_client', :type => 'class' do
 
   spacewalk_repository_package = 'spacewalk_repository_package'
   spacewalk_repository = 'spacewalk_repository'
+  spacewalk_repository_gpg = 'spacewalk_repository_gpg'
+  spacewalk_repository_name = 'spacewalk_repository_name'
   operatingsystemmajrelease_centos = '7'
   fail_operatingsystemrelease = '5'
   fail_operatintsystem = 'Windows'
   if Puppet.version.to_f >= 4.0
-      repo_require_centos = "[Package[#{spacewalk_repository_package}]{:name=>\"#{spacewalk_repository_package}\"}]"
+      repo_require_centos = "[Yumrepo[#{spacewalk_repository_name}]{:name=>\"#{spacewalk_repository_name}\"}]"
   else
-      repo_require_centos = "Package[#{spacewalk_repository_package}]"
+      repo_require_centos = "Yumrepo[#{spacewalk_repository_name}]"
   end
   spacewalk_certificate_url = 'spacewalk_certificate_url'
   local_certificate_folder = '/usr/share/rhn'
@@ -119,7 +121,8 @@ describe 'spacewalk_client', :type => 'class' do
       :operatingsystemmajrelease => operatingsystemmajrelease_centos
       } }
     let(:params) { {
-      :spacewalk_repository_package => spacewalk_repository_package,
+      :spacewalk_repository_gpg => spacewalk_repository_gpg,
+      :spacewalk_repository_name => spacewalk_repository_name,
       :spacewalk_repository => spacewalk_repository,
       :spacewalk_certificate_url => spacewalk_certificate_url,
       :local_certificate_folder => local_certificate_folder,
@@ -132,10 +135,11 @@ describe 'spacewalk_client', :type => 'class' do
       } }
     
     it do
-      should contain_package(spacewalk_repository_package).with(
-          'ensure'   => 'installed',
-          'source'   => spacewalk_repository,
-          'provider' => 'rpm',
+      should contain_yumrepo(spacewalk_repository_name).with(
+          'gpgcheck' => 1,
+          'baseurl' => spacewalk_repository,
+          'enabled' => 1,
+          'gpgkey' => spacewalk_repository_gpg
       )
       should contain_package(centos_spacewalk_package1).with(
         'ensure'  => 'installed',
@@ -189,7 +193,8 @@ describe 'spacewalk_client', :type => 'class' do
       :puppetversion => Puppet.version
       } }
     let(:params) { {
-      :spacewalk_repository_package => spacewalk_repository_package,
+      :spacewalk_repository_gpg => spacewalk_repository_gpg,
+      :spacewalk_repository_name => spacewalk_repository_name,
       :spacewalk_repository => spacewalk_repository,
       :spacewalk_certificate_url => spacewalk_certificate_url,
       :local_certificate_folder => local_certificate_folder,
@@ -261,7 +266,8 @@ describe 'spacewalk_client', :type => 'class' do
       :puppetversion => Puppet.version
       } }
     let(:params) { {
-      :spacewalk_repository_package => spacewalk_repository_package,
+      :spacewalk_repository_gpg => spacewalk_repository_gpg,
+      :spacewalk_repository_name => spacewalk_repository_name,
       :spacewalk_repository => spacewalk_repository,
       :spacewalk_certificate_url => spacewalk_certificate_url,
       :local_certificate_folder => local_certificate_folder,
@@ -337,7 +343,8 @@ describe 'spacewalk_client', :type => 'class' do
       :operatingsystemmajrelease => operatingsystemmajrelease_centos
       } }
     let(:params) { {
-      :spacewalk_repository_package => spacewalk_repository_package,
+      :spacewalk_repository_gpg => spacewalk_repository_gpg,
+      :spacewalk_repository_name => spacewalk_repository_name,
       :spacewalk_repository => spacewalk_repository,
       :spacewalk_certificate_url => spacewalk_certificate_url,
       :local_certificate_folder => local_certificate_folder,
@@ -382,7 +389,8 @@ describe 'spacewalk_client', :type => 'class' do
       :operatingsystemmajrelease => operatingsystemmajrelease_centos
       } }
     let(:params) { {
-      :spacewalk_repository_package => spacewalk_repository_package,
+      :spacewalk_repository_gpg => spacewalk_repository_gpg,
+      :spacewalk_repository_name => spacewalk_repository_name,
       :spacewalk_repository => spacewalk_repository,
       :spacewalk_certificate_url => spacewalk_certificate_url,
       :local_certificate_folder => local_certificate_folder,

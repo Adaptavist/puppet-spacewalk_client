@@ -30,11 +30,16 @@ Specified the protocol to use to access spacewalk, used with the `spacewalk_serv
 
 `spacewalk_client::spacewalk_repository`
 
-Specified the package repository from which Spacekwalk packages can be installed, defaults to **pa:aaronr/spacewalk** on Ubuntu and **http://yum.spacewalkproject.org/2.3-client/RHEL/<MAJOR_OS_VERSION>/x86_64/spacewalk-client-repo-2.3-2.el<MAJOR_OS_VERSION>.noarch.rpm** on RHEL/CentOS systems
+Specified the package repository from which Spacekwalk packages can be installed, defaults to **pa:aaronr/spacewalk** on Ubuntu and **"http://copr-be.cloud.fedoraproject.org/archive/spacewalk/2.3-client/RHEL/<MAHOR_OS_VERSION/$basearch/"** on RHEL/CentOS systems
 
-`spacewalk_client::spacewalk_repository_package`
+`spacewalk_repository_name`
 
-Specified the name of the RPM package used to add the Spacewalk repo, is the RPM package specified in `spacewalk_repository`, this is only needed for RHEL/CentOS systems and defaults to **spacewalk-client-repo-2.3-2.el<MAJOR_OS_VERSION>.noarch.rpm**
+The name of the YUM repository to register on RHEL/Centos systems, unused for Ubuntu, defaults to **spacewalk-client**  on RHEL/CentOS systems
+
+
+`spacewalk_repository_gpg`
+
+Specifies the GPG key location to use for YUM repository registration on RHEL/Centos systems, unused for Ubuntu, defaults to **http://copr-be.cloud.fedoraproject.org/archive/spacewalk/RPM-GPG-KEY-spacewalk-2014**  on RHEL/CentOS systems
 
 `spacewalk_client::spacewalk_packages`
 
