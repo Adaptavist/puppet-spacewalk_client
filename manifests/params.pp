@@ -50,17 +50,24 @@ class spacewalk_client::params {
             $spacewalk_repository_gpg = undef
         }
         'RedHat', 'CentOS': {
-            if ($::operatingsystemmajrelease == '7') {
+            if ($::operatingsystemmajrelease == '8') {
+                $major_os_version = '8'
+            } elsif ($::operatingsystemmajrelease == '7') {
                 $major_os_version = '7'
             } elsif ($::operatingsystemmajrelease == '6') {
                 $major_os_version = '6'
             } else {
                 fail("spacewalk_client - Unsupported RHEL/CentOS Version: ${::operatingsystemmajrelease}")
             }
-            $spacewalk_repository = "http://copr-be.cloud.fedoraproject.org/archive/spacewalk/2.3-client/RHEL/${major_os_version}/\$basearch/"
+            if ($major_os_version == '8' ) {
+                $spacewalk_repository = 'https://copr-be.cloud.fedoraproject.org/results/%40spacewalkproject/spacewalk-2.8-client/fedora-28-x86_64/'
+                $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
+            } else {
+                $spacewalk_repository = "http://copr-be.cloud.fedoraproject.org/archive/spacewalk/2.3-client/RHEL/${major_os_version}/\$basearch/"
+                $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'm2crypto', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
+            }
             $spacewalk_repository_gpg = 'http://copr-be.cloud.fedoraproject.org/archive/spacewalk/RPM-GPG-KEY-spacewalk-2014'
             $spacewalk_repository_name = 'spacewalk-client'
-            $spacewalk_packages = ['rhn-client-tools', 'rhn-check', 'rhn-setup', 'rhnsd', 'm2crypto', 'yum-rhn-plugin', 'rhncfg-management', 'rhncfg-actions']
             $package_manager_disable_diff_file = undef
             $package_manager_disable_diff_content = undef
             $package_manager_repo_file = undef
