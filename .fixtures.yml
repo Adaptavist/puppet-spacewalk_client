@@ -4,5 +4,9 @@ fixtures:
       repo: "https://github.com/Adaptavist/puppet-stdlib"
     apt:
       repo: "https://github.com/Adaptavist/puppet-apt"
+    yumrepo_core:
+      repo: "https://github.com/Adaptavist/puppetlabs-yumrepo_core"
+    augeas_core:
+        repo: "https://github.com/puppetlabs/puppetlabs-augeas_core"
   symlinks:
     spacewalk_client: "#{source_dir}"
